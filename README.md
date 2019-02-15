@@ -7,7 +7,7 @@ An npm initializer for [bouzuya/bs][].
 ## How to build
 
 ```bash
-npm install
+npm install @bouzuya/create-b
 ```
 
 ## License

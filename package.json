@@ -1,5 +1,5 @@
 {
-  "name": "create-b",
+  "name": "@bouzuya/create-b",
   "description": "An npm initializer for [bouzuya/bs][].",
   "version": "0.0.0",
   "author": {
