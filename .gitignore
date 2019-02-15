@@ -1,0 +1,6 @@
+/*.tgz
+/.psc*
+/.spago/
+/index.js
+/node_modules/
+/output/
