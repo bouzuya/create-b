@@ -1,16 +1,33 @@
 module Main where
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
-import Data.Options (Option, Options(..))
+import Data.Maybe (Maybe(..), maybe)
+import Data.Options (Option, Options)
 import Data.Options as Options
 import Data.Tuple (Tuple(..))
 import Data.Tuple as Tuple
 import Effect (Effect)
 import Effect.Class.Console as Console
+import Effect.Exception (throw)
 import Node.Process as Process
-import Prelude (Unit, bind, discard, map, mempty, pure, (<<<), (<>))
+import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
+
+data Template
+  = BlogPostWeekday
+  | BlogPostWeekend
+
+instance showTemplate :: Show Template where
+  show t = "(Template " <> templateToString t <> ")"
+
+templateFromString :: String -> Maybe Template
+templateFromString "blog-post-weekday" = Just BlogPostWeekday
+templateFromString "blog-post-weekend" = Just BlogPostWeekend
+templateFromString _ = Nothing
+
+templateToString :: Template -> String
+templateToString BlogPostWeekday = "blog-post-weekday"
+templateToString BlogPostWeekend = "blog-post-weekend"
 
 type OptionsRecord =
   { directory :: Maybe String
@@ -42,5 +59,14 @@ main :: Effect Unit
 main = do
   args <- map (Array.drop 2) Process.argv
   Console.logShow args
-  options <- pure ((optionsToRecord <<< parseOptions) args)
-  Console.logShow options
+  optionsMaybe <- pure ((optionsToRecord <<< parseOptions) args)
+  options <- maybe (throw "invalid options") pure optionsMaybe
+  template <-
+    maybe
+      (throw "invalid template")
+      pure
+      (maybe
+        (Just BlogPostWeekday)
+        templateFromString
+        options.template)
+  Console.logShow template
