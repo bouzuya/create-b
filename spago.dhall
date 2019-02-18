@@ -7,6 +7,7 @@ You can edit this file as you like.
 , dependencies =
     [ "console"
     , "effect"
+    , "formatters"
     , "node-process"
     , "options"
     , "psci-support"
