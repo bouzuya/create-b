@@ -4,13 +4,21 @@ module Test.TimeZoneOffset
 
 import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Hours(..), Minutes(..))
-import Prelude (discard, map, negate)
+import Prelude ((<), discard, map, negate, show)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import TimeZoneOffset (fromString, toDuration, toString, utc)
 
 tests :: TestSuite
 tests = suite "TimeZoneOffset" do
+  test "Eq TimeZoneOffset" do
+    Assert.equal (fromString "Z") (fromString "Z")
+  test "Ord TimeZoneOffset" do
+    Assert.assert "<" ((fromString "-09:00") < (fromString "+09:00"))
+  test "Show TimeZoneOffset" do
+    Assert.equal
+      (Just "(TimeZoneOffset +09:00)")
+      (map show (fromString "+09:00"))
   test "fromString / toString" do
     Assert.equal (Just "Z") (map toString (fromString "Z"))
     Assert.equal (Just "+09:00") (map toString (fromString "+09:00"))

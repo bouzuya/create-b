@@ -13,16 +13,18 @@ import Data.Either as Either
 import Data.Formatter.Parser.Number (parseInteger)
 import Data.Int as Int
 import Data.Maybe (Maybe(..))
-import Data.Ord (abs, between, (>))
+import Data.Ord (class Ord, abs, between, (<), (>))
 import Data.String.Regex as Regex
 import Data.String.Regex.Flags as RegexFlags
 import Data.Time.Duration (class Duration, Minutes(..), convertDuration)
-import Prelude (class Eq, class Ring, class Show, bind, discard, div, identity, mod, negate, otherwise, show, (*), (+), (<), (<>), (==))
+import Prelude (class Eq, class Ring, class Show, bind, discard, div, identity, mod, negate, otherwise, show, (*), (+), (<>), (==))
 import Text.Parsing.Parser (runParser)
 
 newtype TimeZoneOffset = TimeZoneOffset Int
 
 derive instance eqTimeZoneOffset :: Eq TimeZoneOffset
+
+derive instance ordTimeZoneOffset :: Ord TimeZoneOffset
 
 instance showTimeZoneOffset :: Show TimeZoneOffset where
   show o = "(TimeZoneOffset " <> toString o <> ")"
