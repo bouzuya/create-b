@@ -16,6 +16,8 @@ import Effect.Class.Console as Console
 import Effect.Exception (throw)
 import Effect.Now (nowDateTime)
 import Foreign.Object as Object
+import Node.Encoding as Encoding
+import Node.FS.Sync as FS
 import Node.Process as Process
 import OffsetDateTime as OffsetDateTime
 import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
@@ -81,6 +83,9 @@ pathFormatter =
     , Formatter.DayOfMonthTwoDigits
     ]
 
+readTemplate :: String -> Effect String
+readTemplate s = FS.readTextFile Encoding.UTF8 ("./templates/" <> s)
+
 main :: Effect Unit
 main = do
   args <- map (Array.drop 2) Process.argv
@@ -122,57 +127,13 @@ main = do
   generated <-
     case template of
       BlogPostWeekday -> do
-        pure
-          { content: ""
-          , meta:
-              SimpleJSON.writeJSON
-                { minutes: 0
-                , pubdate: "{{local_date_time}}"
-                , tags: [] :: Array String
-                , title: ""
-                }
-          , path: "{{blog_post_path}}"
-          }
-      BlogPostWeekend ->
-        pure
-          { content:
-              Array.fold
-                [ "{{year_week}} をふりかえる。"
-                , ""
-                , "# [{{year_week}} の目標][] とその記事"
-                , ""
-                , "目標。"
-                , ""
-                , "記事。"
-                , ""
-                , "# つくったもの"
-                , ""
-                , "# よんだもの"
-                , ""
-                , "# みたもの"
-                , ""
-                , "# その他"
-                , ""
-                , "ゲーム。"
-                , ""
-                , "買い物。"
-                , ""
-                , "体調。"
-                , ""
-                , "育児。"
-                , ""
-                , "# の目標"
-                , ""
-                ]
-          , meta:
-              SimpleJSON.writeJSON
-                { minutes: 0
-                , pubdate: "{{local_date_time}}"
-                , tags: ["weekly report"]
-                , title: "{{year_week}} ふりかえり"
-                }
-          , path: "{{blog_post_path}}"
-          }
+        content <- readTemplate "blog_post_weekday.md"
+        meta <- readTemplate "blog_post_weekday.json"
+        pure { content, meta, path: "{{blog_post_path}}" }
+      BlogPostWeekend -> do
+        content <- readTemplate "blog_post_weekend.md"
+        meta <- readTemplate "blog_post_weekend.json"
+        pure { content, meta, path: "{{blog_post_path}}" }
   Console.log (TemplateString.template generated.content templateVariables)
   Console.log (TemplateString.template generated.meta templateVariables)
   Console.log (TemplateString.template generated.path templateVariables)

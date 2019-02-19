@@ -9,6 +9,7 @@ You can edit this file as you like.
     , "console"
     , "effect"
     , "formatters"
+    , "node-fs"
     , "node-process"
     , "now"
     , "options"
