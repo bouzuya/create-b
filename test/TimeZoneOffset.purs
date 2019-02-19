@@ -4,12 +4,12 @@ module Test.TimeZoneOffset
 
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
-import Data.Time.Duration (Hours(..), Milliseconds(..), Minutes(..), Seconds(..))
+import Data.Time.Duration (Hours(..), Milliseconds, Minutes(..), Seconds(..))
 import Data.Time.Duration as Duration
 import Prelude (bottom, discard, map, negate, show, top, (<))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
-import TimeZoneOffset (TimeZoneOffset, fromDuration, fromString, toDuration, toString, utc)
+import TimeZoneOffset (fromDuration, fromString, toDuration, toString, utc)
 
 tests :: TestSuite
 tests = suite "TimeZoneOffset" do
