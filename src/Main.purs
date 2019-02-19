@@ -1,4 +1,6 @@
-module Main where
+module Main
+  ( main
+  ) where
 
 import Data.Array as Array
 import Data.Maybe (Maybe(..), maybe)
@@ -9,9 +11,12 @@ import Data.Tuple as Tuple
 import Effect (Effect)
 import Effect.Class.Console as Console
 import Effect.Exception (throw)
+import Effect.Now (nowDateTime)
 import Node.Process as Process
+import OffsetDateTime as OffsetDateTime
 import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
+import TimeZoneOffset as TimeZoneOffset
 
 data Template
   = BlogPostWeekday
@@ -70,3 +75,39 @@ main = do
         templateFromString
         options.template)
   Console.logShow template
+  dateTimeInUTC <- nowDateTime
+  inJp <-
+    maybe
+      (throw "invalid time zone offset")
+      pure
+      (TimeZoneOffset.fromString "+09:00")
+  nowInJp <-
+    maybe
+      (throw "invalid offset date time")
+      pure
+      (OffsetDateTime.offsetDateTime inJp dateTimeInUTC)
+  generated <-
+    case template of
+      BlogPostWeekday -> do
+        pure
+          { content: ""
+          , meta:
+            { minutes: 0
+            , pubdate: OffsetDateTime.toString nowInJp
+            , tags: []
+            , title: ""
+            }
+          , path: "/2019/01/2019-01-01"
+          }
+      BlogPostWeekend ->
+        pure
+          { content: ""
+          , meta:
+            { minutes: 0
+            , pubdate: OffsetDateTime.toString nowInJp
+            , tags: ["weekly report"]
+            , title: "2019-W01 ふりかえり"
+            }
+          , path: "/2019/01/2019-01-01"
+          }
+  Console.logShow generated
