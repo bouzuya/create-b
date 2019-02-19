@@ -2,18 +2,28 @@ module TemplateString
   ( template
   ) where
 
-import Data.String as String
+import Data.Array as Array
+import Data.Either as Either
+import Data.Maybe as Maybe
+import Data.String.Regex as Regex
+import Data.String.Regex as String
+import Data.String.Regex.Flags as RegexFlags
 import Foreign.Object (Object)
 import Foreign.Object as Object
-import Prelude ((<>))
+import Partial.Unsafe as Unsafe
+import Prelude (bind)
+
+pattern :: String.Regex
+pattern =
+  Unsafe.unsafePartial
+    (Either.fromRight
+      (Regex.regex "\\{\\{([a-zA-Z][a-zA-Z0-9]*)\\}\\}" RegexFlags.global))
 
 template :: String -> Object String -> String
-template = Object.fold go
-  where
-    go :: String -> String -> String -> String
-    go s k v =
-      String.replaceAll
-        (String.Pattern ("{{" <> k <> "}}"))
-        (String.Replacement v)
-        s
-
+template tmpl obj =
+  Regex.replace'
+    pattern
+    (\s m -> Maybe.fromMaybe s do
+      key <- Array.index m 0
+      Object.lookup key obj)
+    tmpl
