@@ -3,8 +3,6 @@ module Test.Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Console (log)
-import Main as Main
 import Test.OffsetDateTime as OffsetDateTime
 import Test.TemplateString as TemplateString
 import Test.TimeZoneOffset as TimezoneOffset
@@ -12,11 +10,8 @@ import Test.Unit.Main (runTest)
 import Test.WeekDate as WeekDate
 
 main :: Effect Unit
-main = do
-  Main.main
-  log "You should add some tests."
-  runTest do
-    OffsetDateTime.tests
-    TemplateString.tests
-    TimezoneOffset.tests
-    WeekDate.tests
+main = runTest do
+  OffsetDateTime.tests
+  TemplateString.tests
+  TimezoneOffset.tests
+  WeekDate.tests
