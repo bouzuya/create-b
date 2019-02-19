@@ -16,7 +16,6 @@ import Data.Tuple (Tuple(..))
 import Data.Tuple as Tuple
 import DateTimeFormatter as DateTimeFormatter
 import Effect (Effect)
-import Effect.Class.Console as Console
 import Effect.Exception (throw)
 import Effect.Now (nowDateTime)
 import Foreign.Object as Object
@@ -93,7 +92,6 @@ readTemplate s = FS.readTextFile Encoding.UTF8 ("./templates/" <> s)
 main :: Effect Unit
 main = do
   args <- map (Array.drop 2) Process.argv
-  Console.logShow args
   optionsMaybe <- pure ((optionsToRecord <<< parseOptions) args)
   options <- maybe (throw "invalid options") pure optionsMaybe
   directory <- maybe (throw "directory is required") pure options.directory
@@ -105,7 +103,6 @@ main = do
         (Just BlogPostWeekday)
         templateFromString
         options.template)
-  Console.logShow template
   dateTimeInUTC <- nowDateTime
   inJp <-
     maybe
@@ -127,7 +124,6 @@ main = do
        (map
          (\days -> DateTime.adjust days localDateTime)
          (map (Days <<< negate <<< Int.toNumber) (Array.range 1 7)))
-  Console.logShow ((map DateTimeFormatter.toDateString) dates)
   posts <-
     traverse
       (\dt -> do
@@ -177,6 +173,9 @@ main = do
         content <- readTemplate "blog_post_weekend.md"
         meta <- readTemplate "blog_post_weekend.json"
         pure { content, meta, path: "{{blog_post_path}}" }
-  Console.log (TemplateString.template generated.content templateVariables)
-  Console.log (TemplateString.template generated.meta templateVariables)
-  Console.log (TemplateString.template generated.path templateVariables)
+  let
+    content = TemplateString.template generated.content templateVariables
+    meta = TemplateString.template generated.meta templateVariables
+    path = TemplateString.template generated.path templateVariables
+  FS.writeTextFile Encoding.UTF8 (directory <> path <> ".md") content
+  FS.writeTextFile Encoding.UTF8 (directory <> path <> ".json") meta
