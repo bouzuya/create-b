@@ -2,15 +2,19 @@ module Main
   ( main
   ) where
 
-import Bouzuya.DateTime (date)
+import Bouzuya.DateTime as DateTime
 import Data.Array as Array
 import Data.Formatter.DateTime as Formatter
+import Data.Int as Int
 import Data.List as List
 import Data.Maybe (Maybe(..), maybe)
 import Data.Options (Option, Options)
 import Data.Options as Options
+import Data.Time.Duration (Days(..))
+import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Data.Tuple as Tuple
+import DateTimeFormatter as DateTimeFormatter
 import Effect (Effect)
 import Effect.Class.Console as Console
 import Effect.Exception (throw)
@@ -20,7 +24,7 @@ import Node.Encoding as Encoding
 import Node.FS.Sync as FS
 import Node.Process as Process
 import OffsetDateTime as OffsetDateTime
-import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
+import Prelude (class Show, Unit, bind, discard, map, mempty, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TemplateString as TemplateString
 import TimeZoneOffset as TimeZoneOffset
@@ -92,6 +96,7 @@ main = do
   Console.logShow args
   optionsMaybe <- pure ((optionsToRecord <<< parseOptions) args)
   options <- maybe (throw "invalid options") pure optionsMaybe
+  directory <- maybe (throw "directory is required") pure options.directory
   template <-
     maybe
       (throw "invalid template")
@@ -113,8 +118,44 @@ main = do
       pure
       (OffsetDateTime.offsetDateTime inJp dateTimeInUTC)
   localDateTime <- pure (OffsetDateTime.toDateTime nowInJp)
-  wd <- pure (WeekDate.toWeekDate (date localDateTime))
+  wd <- pure (WeekDate.toWeekDate (DateTime.date localDateTime))
   let
+    wy = WeekDate.weekYear wd
+    woy = WeekDate.weekOfYear wd
+    dates =
+      Array.catMaybes
+       (map
+         (\days -> DateTime.adjust days localDateTime)
+         (map (Days <<< negate <<< Int.toNumber) (Array.range 1 7)))
+  Console.logShow ((map DateTimeFormatter.toDateString) dates)
+  posts <-
+    traverse
+      (\dt -> do
+        text <-
+          FS.readTextFile
+            Encoding.UTF8
+            (directory <>
+              (Formatter.format pathFormatter dt) <> ".json")
+        { title } <-
+          maybe
+            (throw "invalid meta data")
+            pure
+            (SimpleJSON.readJSON_ text :: _ { title :: String })
+        pure { date: DateTimeFormatter.toDateString dt, title })
+      dates
+  let
+    weekPosts =
+      Array.intercalate
+        "\n"
+        (map
+          (\{ date, title } ->
+            TemplateString.template
+              "- [{{date}} {{title}}][{{date}}]"
+              (Object.fromFoldable
+                [ Tuple "date" date
+                , Tuple "title" title
+                ]))
+          posts)
     templateVariables =
       Object.fromFoldable
         [ -- YYYY-MM-DDTHH:MM:SS+09:00
@@ -123,6 +164,8 @@ main = do
         , Tuple "year_week" (WeekDate.toYearWeekString wd)
           -- /YYYY/MM/YYYY-MM-DD
         , Tuple "blog_post_path" (Formatter.format pathFormatter localDateTime)
+          -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
+        , Tuple "week_posts" weekPosts
         ]
   generated <-
     case template of
