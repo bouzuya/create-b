@@ -4,6 +4,7 @@ module OffsetDateTime
   , inUTC
   , offsetDateTime
   , toDateString
+  , toDateTime
   , toString
   , toTimeString
   ) where
@@ -67,6 +68,10 @@ toDateString' =
       , Formatter.Placeholder "-"
       , Formatter.DayOfMonthTwoDigits
       ])
+
+-- | local date time
+toDateTime :: OffsetDateTime -> DateTime
+toDateTime (OffsetDateTime _ _ (LocalDateTime local)) = local
 
 -- YYYY-MM-DDTHH:MM:SS
 toDateTimeString' :: DateTime -> String
