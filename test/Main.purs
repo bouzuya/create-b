@@ -8,6 +8,7 @@ import Main as Main
 import Test.OffsetDateTime as OffsetDateTime
 import Test.TimeZoneOffset as TimezoneOffset
 import Test.Unit.Main (runTest)
+import Test.WeekDate as WeekDate
 
 main :: Effect Unit
 main = do
@@ -16,3 +17,4 @@ main = do
   runTest do
     OffsetDateTime.tests
     TimezoneOffset.tests
+    WeekDate.tests
