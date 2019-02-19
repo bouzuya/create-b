@@ -30,3 +30,12 @@ tests = suite "TemplateString" do
     Assert.equal
       "{{bar}}{{foo}}"
       (template "{{foo}}{{bar}}" obj2)
+    let
+      obj3 =
+        Object.fromFoldable
+          [ Tuple "foo-bar" "FOO-BAR"
+          , Tuple "a_b" "A_B"
+          ]
+    Assert.equal
+      "FOO-BAR:A_B"
+      (template "{{foo-bar}}:{{a_b}}" obj3)

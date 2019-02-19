@@ -17,7 +17,7 @@ pattern :: String.Regex
 pattern =
   Unsafe.unsafePartial
     (Either.fromRight
-      (Regex.regex "\\{\\{([a-zA-Z][a-zA-Z0-9]*)\\}\\}" RegexFlags.global))
+      (Regex.regex "\\{\\{([a-zA-Z][-_a-zA-Z0-9]*)\\}\\}" RegexFlags.global))
 
 template :: String -> Object String -> String
 template tmpl obj =
