@@ -15,10 +15,12 @@ import Effect (Effect)
 import Effect.Class.Console as Console
 import Effect.Exception (throw)
 import Effect.Now (nowDateTime)
+import Foreign.Object as Object
 import Node.Process as Process
 import OffsetDateTime as OffsetDateTime
 import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
+import TemplateString as TemplateString
 import TimeZoneOffset as TimeZoneOffset
 import WeekDate as WeekDate
 
@@ -107,28 +109,70 @@ main = do
       (OffsetDateTime.offsetDateTime inJp dateTimeInUTC)
   localDateTime <- pure (OffsetDateTime.toDateTime nowInJp)
   wd <- pure (WeekDate.toWeekDate (date localDateTime))
+  let
+    templateVariables =
+      Object.fromFoldable
+        [ -- YYYY-MM-DDTHH:MM:SS+09:00
+          Tuple "local_date_time" (OffsetDateTime.toString nowInJp)
+          -- YYYY-Www
+        , Tuple "year_week" (WeekDate.toYearWeekString wd)
+          -- /YYYY/MM/YYYY-MM-DD
+        , Tuple "blog_post_path" (Formatter.format pathFormatter localDateTime)
+        ]
   generated <-
     case template of
       BlogPostWeekday -> do
         pure
           { content: ""
           , meta:
-            { minutes: 0
-            , pubdate: OffsetDateTime.toString nowInJp
-            , tags: []
-            , title: ""
-            }
-          , path: Formatter.format pathFormatter localDateTime
+              SimpleJSON.writeJSON
+                { minutes: 0
+                , pubdate: "{{local_date_time}}"
+                , tags: [] :: Array String
+                , title: ""
+                }
+          , path: "{{blog_post_path}}"
           }
       BlogPostWeekend ->
         pure
-          { content: ""
+          { content:
+              Array.fold
+                [ "{{year_week}} をふりかえる。"
+                , ""
+                , "# [{{year_week}} の目標][] とその記事"
+                , ""
+                , "目標。"
+                , ""
+                , "記事。"
+                , ""
+                , "# つくったもの"
+                , ""
+                , "# よんだもの"
+                , ""
+                , "# みたもの"
+                , ""
+                , "# その他"
+                , ""
+                , "ゲーム。"
+                , ""
+                , "買い物。"
+                , ""
+                , "体調。"
+                , ""
+                , "育児。"
+                , ""
+                , "# の目標"
+                , ""
+                ]
           , meta:
-            { minutes: 0
-            , pubdate: OffsetDateTime.toString nowInJp
-            , tags: ["weekly report"]
-            , title: (WeekDate.toYearWeekString wd) <> " ふりかえり"
-            }
-          , path: Formatter.format pathFormatter localDateTime
+              SimpleJSON.writeJSON
+                { minutes: 0
+                , pubdate: "{{local_date_time}}"
+                , tags: ["weekly report"]
+                , title: "{{year_week}} ふりかえり"
+                }
+          , path: "{{blog_post_path}}"
           }
-  Console.logShow generated
+  Console.log (TemplateString.template generated.content templateVariables)
+  Console.log (TemplateString.template generated.meta templateVariables)
+  Console.log (TemplateString.template generated.path templateVariables)
