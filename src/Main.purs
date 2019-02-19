@@ -2,7 +2,10 @@ module Main
   ( main
   ) where
 
+import Bouzuya.DateTime (date)
 import Data.Array as Array
+import Data.Formatter.DateTime as Formatter
+import Data.List as List
 import Data.Maybe (Maybe(..), maybe)
 import Data.Options (Option, Options)
 import Data.Options as Options
@@ -17,6 +20,7 @@ import OffsetDateTime as OffsetDateTime
 import Prelude (class Show, Unit, bind, discard, map, mempty, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TimeZoneOffset as TimeZoneOffset
+import WeekDate as WeekDate
 
 data Template
   = BlogPostWeekday
@@ -60,6 +64,21 @@ parseOptions args = Tuple.snd (Array.foldl go (Tuple Nothing mempty) args)
     go (Tuple (Just option) options) arg =
       Tuple Nothing (options <> Options.assoc option arg)
 
+pathFormatter :: Formatter.Formatter
+pathFormatter =
+  List.fromFoldable
+    [ Formatter.Placeholder "/"
+    , Formatter.YearFull
+    , Formatter.Placeholder "/"
+    , Formatter.MonthTwoDigits
+    , Formatter.Placeholder "/"
+    , Formatter.YearFull
+    , Formatter.Placeholder "-"
+    , Formatter.MonthTwoDigits
+    , Formatter.Placeholder "-"
+    , Formatter.DayOfMonthTwoDigits
+    ]
+
 main :: Effect Unit
 main = do
   args <- map (Array.drop 2) Process.argv
@@ -86,6 +105,8 @@ main = do
       (throw "invalid offset date time")
       pure
       (OffsetDateTime.offsetDateTime inJp dateTimeInUTC)
+  localDateTime <- pure (OffsetDateTime.toDateTime nowInJp)
+  wd <- pure (WeekDate.toWeekDate (date localDateTime))
   generated <-
     case template of
       BlogPostWeekday -> do
@@ -97,7 +118,7 @@ main = do
             , tags: []
             , title: ""
             }
-          , path: "/2019/01/2019-01-01"
+          , path: Formatter.format pathFormatter localDateTime
           }
       BlogPostWeekend ->
         pure
@@ -106,8 +127,8 @@ main = do
             { minutes: 0
             , pubdate: OffsetDateTime.toString nowInJp
             , tags: ["weekly report"]
-            , title: "2019-W01 ふりかえり"
+            , title: (WeekDate.toYearWeekString wd) <> " ふりかえり"
             }
-          , path: "/2019/01/2019-01-01"
+          , path: Formatter.format pathFormatter localDateTime
           }
   Console.logShow generated
