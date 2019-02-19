@@ -9,7 +9,7 @@ import Partial.Unsafe (unsafePartial)
 import Prelude (bind, discard, ($))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
-import WeekDate (dayOfWeek, toDate, toISOString, toWeekDate, weekOfYear, weekYear)
+import WeekDate (dayOfWeek, toDate, toISOString, toWeekDate, toYearWeekString, weekOfYear, weekYear)
 
 tests :: TestSuite
 tests = suite "WeekDate" do
@@ -33,6 +33,9 @@ tests = suite "WeekDate" do
   test "toWeekDate" do
     -- do nothing
     Assert.equal 1 1
+
+  test "toYearWeekString" do
+    Assert.equal "2019-W01" (toYearWeekString (toWeekDate d1))
 
   test "weekYear" do
     Assert.equal (Date.weekYear d1) (weekYear (toWeekDate d1))

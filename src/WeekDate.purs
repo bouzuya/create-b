@@ -4,6 +4,7 @@ module WeekDate
   , toDate
   , toISOString
   , toWeekDate
+  , toYearWeekString
   , weekYear
   , weekOfYear
   ) where
@@ -47,21 +48,9 @@ dayOfWeek (WeekDate t) = Tuple.get3 t
 toDate :: WeekDate -> BouzuyaDate.Date
 toDate (WeekDate t) = Tuple.get4 t
 
+-- | YYYY-Www-D
 toISOString :: WeekDate -> String
-toISOString wd =
-  let
-    y = fromEnum (weekYear wd)
-    woy = fromEnum (weekOfYear wd)
-    dow = fromEnum (dayOfWeek wd)
-    pad2 n
-      | n < 10 = "0" <> show n
-      | otherwise = show n
-    pad4 n
-      | n < 10 = "000" <> show n
-      | n < 100 = "00" <> show n
-      | n < 1000 = "0" <> show n
-      | otherwise = show n
-  in intercalate "" [pad4 y, "-W", pad2 woy, "-", show dow]
+toISOString wd = toYearWeekString wd <> "-" <> show (fromEnum (dayOfWeek wd))
 
 toWeekDate :: BouzuyaDate.Date -> WeekDate
 toWeekDate d =
@@ -71,6 +60,22 @@ toWeekDate d =
         (BouzuyaDate.weekOfYear d)
         (BouzuyaDate.weekday d)
         d)
+
+-- | YYYY-Www
+toYearWeekString :: WeekDate -> String
+toYearWeekString wd =
+  let
+    y = fromEnum (weekYear wd)
+    woy = fromEnum (weekOfYear wd)
+    pad2 n
+      | n < 10 = "0" <> show n
+      | otherwise = show n
+    pad4 n
+      | n < 10 = "000" <> show n
+      | n < 100 = "00" <> show n
+      | n < 1000 = "0" <> show n
+      | otherwise = show n
+  in intercalate "" [pad4 y, "-W", pad2 woy]
 
 weekYear :: WeekDate -> BouzuyaDate.Year
 weekYear (WeekDate t) = Tuple.get1 t
