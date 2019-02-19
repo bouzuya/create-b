@@ -7,9 +7,9 @@ import Data.DateTime (DateTime(..))
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
 import Data.Time (Time(..))
-import DateTimeFormatter (toDateString, toDateTimeString, toTimeString)
+import DateTimeFormatter (toDateString, toDateString', toDateTimeString, toTimeString, toTimeString')
 import Partial.Unsafe (unsafePartial)
-import Prelude (bind, discard, pure, (<$>), (<*>))
+import Prelude (bind, discard, pure)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 
@@ -27,10 +27,16 @@ tests = suite "DateTimeFormatter" do
       s <- toEnum 5
       ms <- toEnum 6
       pure (Time h m s ms)
-    dt1 = unsafePartial (fromJust (DateTime <$> dateMaybe1 <*> timeMaybe1))
+    d1 = unsafePartial (fromJust dateMaybe1)
+    t1 = unsafePartial (fromJust timeMaybe1)
+    dt1 = DateTime d1 t1
   test "toDateString" do
     Assert.equal "2000-01-02" (toDateString dt1)
+  test "toDateString'" do
+    Assert.equal "2000-01-02" (toDateString' d1)
   test "toDateTimeString" do
     Assert.equal "2000-01-02T03:04:05" (toDateTimeString dt1)
   test "toTimeString" do
     Assert.equal "03:04:05" (toTimeString dt1)
+  test "toTimeString'" do
+    Assert.equal "03:04:05" (toTimeString' t1)

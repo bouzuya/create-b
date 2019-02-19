@@ -1,13 +1,15 @@
 module DateTimeFormatter
   ( toDateString
+  , toDateString'
   , toDateTimeString
   , toTimeString
+  , toTimeString'
   ) where
 
-import Data.DateTime (DateTime)
+import Data.DateTime (Date, DateTime(..), Time)
 import Data.Formatter.DateTime as Formatter
 import Data.List as List
-import Prelude ((<>))
+import Prelude (bottom, (<>))
 
 -- YYYY-MM-DD
 toDateString :: DateTime -> String
@@ -20,6 +22,10 @@ toDateString =
       , Formatter.Placeholder "-"
       , Formatter.DayOfMonthTwoDigits
       ])
+
+-- YYYY-MM-DD
+toDateString' :: Date -> String
+toDateString' d = toDateString (DateTime d bottom)
 
 -- YYYY-MM-DDTHH:MM:SS
 toDateTimeString :: DateTime -> String
@@ -36,3 +42,7 @@ toTimeString =
       , Formatter.Placeholder ":"
       , Formatter.SecondsTwoDigits
       ])
+
+-- HH:MM:SS
+toTimeString' :: Time -> String
+toTimeString' t = toTimeString (DateTime bottom t)
