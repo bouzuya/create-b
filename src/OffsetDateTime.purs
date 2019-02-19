@@ -11,10 +11,9 @@ module OffsetDateTime
 
 import Data.DateTime (DateTime)
 import Data.DateTime as DateTime
-import Data.Formatter.DateTime as Formatter
-import Data.List as List
 import Data.Maybe (Maybe)
 import Data.Time.Duration (Milliseconds)
+import DateTimeFormatter as DateTimeFormatter
 import Prelude (class Eq, class Show, bind, map, pure, show, (<>))
 import TimeZoneOffset (TimeZoneOffset)
 import TimeZoneOffset as TimeZoneOffset
@@ -55,44 +54,18 @@ timeZoneOffset :: OffsetDateTime -> TimeZoneOffset
 timeZoneOffset (OffsetDateTime _ offset _) = offset
 
 toDateString :: OffsetDateTime -> String
-toDateString (OffsetDateTime _ _ (LocalDateTime local)) = toDateString' local
-
--- YYYY-MM-DD
-toDateString' :: DateTime -> String
-toDateString' =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.YearFull
-      , Formatter.Placeholder "-"
-      , Formatter.MonthTwoDigits
-      , Formatter.Placeholder "-"
-      , Formatter.DayOfMonthTwoDigits
-      ])
+toDateString (OffsetDateTime _ _ (LocalDateTime local)) =
+  DateTimeFormatter.toDateString local
 
 -- | local date time
 toDateTime :: OffsetDateTime -> DateTime
 toDateTime (OffsetDateTime _ _ (LocalDateTime local)) = local
 
--- YYYY-MM-DDTHH:MM:SS
-toDateTimeString' :: DateTime -> String
-toDateTimeString' dt = (toDateString' dt) <> "T" <> (toTimeString' dt)
-
 -- YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS+HH:MM
 toString :: OffsetDateTime -> String
 toString (OffsetDateTime _ offset (LocalDateTime local)) =
-  (toDateTimeString' local) <> (TimeZoneOffset.toString offset)
+  (DateTimeFormatter.toDateTimeString local) <> (TimeZoneOffset.toString offset)
 
 toTimeString :: OffsetDateTime -> String
-toTimeString (OffsetDateTime _ _ (LocalDateTime local)) = toTimeString' local
-
--- HH:MM:SS
-toTimeString' :: DateTime -> String
-toTimeString' =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.Hours24
-      , Formatter.Placeholder ":"
-      , Formatter.MinutesTwoDigits
-      , Formatter.Placeholder ":"
-      , Formatter.SecondsTwoDigits
-      ])
+toTimeString (OffsetDateTime _ _ (LocalDateTime local)) =
+  DateTimeFormatter.toTimeString local
