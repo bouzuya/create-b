@@ -2,8 +2,10 @@ module Main
   ( main
   ) where
 
+import Bouzuya.DateTime (Date, DateTime(..))
 import Bouzuya.DateTime as DateTime
 import Data.Array as Array
+import Data.Date as Date
 import Data.Formatter.DateTime as Formatter
 import Data.Int as Int
 import Data.List as List
@@ -23,7 +25,7 @@ import Node.Encoding as Encoding
 import Node.FS.Sync as FS
 import Node.Process as Process
 import OffsetDateTime as OffsetDateTime
-import Prelude (class Show, Unit, bind, discard, map, mempty, negate, pure, (<<<), (<>))
+import Prelude (class Show, Unit, bind, bottom, discard, map, mempty, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TemplateString as TemplateString
 import TimeZoneOffset as TimeZoneOffset
@@ -86,8 +88,18 @@ pathFormatter =
     , Formatter.DayOfMonthTwoDigits
     ]
 
+formatPath :: Date -> String
+formatPath d = Formatter.format pathFormatter (DateTime d bottom)
+
 readTemplate :: String -> Effect String
 readTemplate s = FS.readTextFile Encoding.UTF8 ("./templates/" <> s)
+
+-- [(d - 1), (d - 2), ..., (d - 7)]
+datesInWeekBefore :: Date -> Array Date
+datesInWeekBefore date =
+  Array.catMaybes do
+    days <- map (Days <<< negate <<< Int.toNumber) (Array.range 1 7)
+    pure (Date.adjust days date)
 
 main :: Effect Unit
 main = do
@@ -119,25 +131,18 @@ main = do
   let
     wy = WeekDate.weekYear wd
     woy = WeekDate.weekOfYear wd
-    dates =
-      Array.catMaybes
-       (map
-         (\days -> DateTime.adjust days localDateTime)
-         (map (Days <<< negate <<< Int.toNumber) (Array.range 1 7)))
+    dates = datesInWeekBefore (DateTime.date localDateTime)
   posts <-
     traverse
-      (\dt -> do
+      (\d -> do
         text <-
-          FS.readTextFile
-            Encoding.UTF8
-            (directory <>
-              (Formatter.format pathFormatter dt) <> ".json")
+          FS.readTextFile Encoding.UTF8 (directory <> (formatPath d) <> ".json")
         { title } <-
           maybe
             (throw "invalid meta data")
             pure
             (SimpleJSON.readJSON_ text :: _ { title :: String })
-        pure { date: DateTimeFormatter.toDateString dt, title })
+        pure { date: DateTimeFormatter.toDateString' d, title })
       dates
   let
     weekPosts =
