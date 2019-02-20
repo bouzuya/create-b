@@ -7,7 +7,7 @@
     "name": "bouzuya",
     "email": "m@bouzuya.net"
   },
-  "bin": "create-b",
+  "bin": "bin/create-b",
   "bugs": {
     "url": "https://github.com/bouzuya/create-b/issues"
   },
