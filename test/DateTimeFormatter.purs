@@ -7,7 +7,7 @@ import Data.DateTime (DateTime(..))
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
 import Data.Time (Time(..))
-import DateTimeFormatter (toDateString, toDateString', toDateTimeString, toTimeString, toTimeString')
+import DateTimeFormatter (toDateString, toDateString', toDateTimeString, toMonthString, toMonthString', toTimeString, toTimeString', toYearString, toYearString')
 import Partial.Unsafe (unsafePartial)
 import Prelude (bind, discard, pure)
 import Test.Unit (TestSuite, suite, test)
@@ -36,7 +36,15 @@ tests = suite "DateTimeFormatter" do
     Assert.equal "2000-01-02" (toDateString' d1)
   test "toDateTimeString" do
     Assert.equal "2000-01-02T03:04:05" (toDateTimeString dt1)
+  test "toMonthString" do
+    Assert.equal "01" (toMonthString dt1)
+  test "toYearString'" do
+    Assert.equal "01" (toMonthString' d1)
   test "toTimeString" do
     Assert.equal "03:04:05" (toTimeString dt1)
   test "toTimeString'" do
     Assert.equal "03:04:05" (toTimeString' t1)
+  test "toYearString" do
+    Assert.equal "2000" (toYearString dt1)
+  test "toYearString'" do
+    Assert.equal "2000" (toYearString' d1)

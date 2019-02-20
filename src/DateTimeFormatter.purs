@@ -2,8 +2,12 @@ module DateTimeFormatter
   ( toDateString
   , toDateString'
   , toDateTimeString
+  , toMonthString
+  , toMonthString'
   , toTimeString
   , toTimeString'
+  , toYearString
+  , toYearString'
   ) where
 
 import Data.DateTime (Date, DateTime(..), Time)
@@ -31,6 +35,18 @@ toDateString' d = toDateString (DateTime d bottom)
 toDateTimeString :: DateTime -> String
 toDateTimeString dt = (toDateString dt) <> "T" <> (toTimeString dt)
 
+-- MM
+toMonthString :: DateTime -> String
+toMonthString =
+  Formatter.format
+    (List.fromFoldable
+      [ Formatter.MonthTwoDigits
+      ])
+
+-- MM
+toMonthString' :: Date -> String
+toMonthString' d = toMonthString (DateTime d bottom)
+
 -- HH:MM:SS
 toTimeString :: DateTime -> String
 toTimeString =
@@ -46,3 +62,15 @@ toTimeString =
 -- HH:MM:SS
 toTimeString' :: Time -> String
 toTimeString' t = toTimeString (DateTime bottom t)
+
+-- YYYY
+toYearString :: DateTime -> String
+toYearString =
+  Formatter.format
+    (List.fromFoldable
+      [ Formatter.YearFull
+      ])
+
+-- YYYY
+toYearString' :: Date -> String
+toYearString' d = toYearString (DateTime d bottom)
