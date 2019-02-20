@@ -3,7 +3,7 @@ module Main
   ) where
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (maybe)
 import Effect (Effect)
 import Effect.Exception (throw)
 import Node.Encoding as Encoding
@@ -11,7 +11,6 @@ import Node.FS.Sync as FS
 import Node.Process as Process
 import Options as Options
 import Prelude (Unit, bind, discard, map, pure, (<>))
-import Template as Template
 import TemplateString as TemplateString
 import TemplateVariables as TemplateVariables
 
@@ -24,14 +23,6 @@ main = do
   optionsMaybe <- pure (Options.parseOptions args)
   options <- maybe (throw "invalid options") pure optionsMaybe
   directory <- maybe (throw "directory is required") pure options.directory
-  template <-
-    maybe
-      (throw "invalid template")
-      pure
-      (maybe
-        (Just Template.BlogPostWeekday)
-        Template.fromString
-        options.template)
   contentTemplate <- maybe (pure "") readTemplate options.contentTemplate
   metaTemplate <- maybe (pure "") readTemplate options.metaTemplate
   templateVariables <- TemplateVariables.build directory
