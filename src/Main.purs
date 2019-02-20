@@ -3,7 +3,7 @@ module Main
   ) where
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Effect (Effect)
 import Effect.Exception (throw)
 import Node.Encoding as Encoding
@@ -16,7 +16,7 @@ import TemplateString as TemplateString
 import TemplateVariables as TemplateVariables
 
 readTemplate :: String -> Effect String
-readTemplate s = FS.readTextFile Encoding.UTF8 ("./templates/" <> s)
+readTemplate = FS.readTextFile Encoding.UTF8
 
 main :: Effect Unit
 main = do
@@ -32,20 +32,15 @@ main = do
         (Just Template.BlogPostWeekday)
         Template.fromString
         options.template)
+  contentTemplate <- maybe (pure "") readTemplate options.contentTemplate
+  metaTemplate <- maybe (pure "") readTemplate options.metaTemplate
   templateVariables <- TemplateVariables.build directory
-  generated <-
-    case template of
-      Template.BlogPostWeekday -> do
-        content <- readTemplate "blog_post_weekday.md"
-        meta <- readTemplate "blog_post_weekday.json"
-        pure { content, meta, path: "/{{year}}/{{month}}/{{date}}" }
-      Template.BlogPostWeekend -> do
-        content <- readTemplate "blog_post_weekend.md"
-        meta <- readTemplate "blog_post_weekend.json"
-        pure { content, meta, path: "/{{year}}/{{month}}/{{date}}" }
   let
-    content = TemplateString.template generated.content templateVariables
-    meta = TemplateString.template generated.meta templateVariables
-    path = TemplateString.template generated.path templateVariables
-  FS.writeTextFile Encoding.UTF8 (directory <> path <> ".md") content
-  FS.writeTextFile Encoding.UTF8 (directory <> path <> ".json") meta
+    content = TemplateString.template contentTemplate templateVariables
+    meta = TemplateString.template metaTemplate templateVariables
+    path =
+      TemplateString.template "/{{year}}/{{month}}/{{date}}" templateVariables
+    contentPath = directory <> path <> ".md"
+    metaPath = directory <> path <> ".json"
+  FS.writeTextFile Encoding.UTF8 contentPath content
+  FS.writeTextFile Encoding.UTF8 metaPath meta

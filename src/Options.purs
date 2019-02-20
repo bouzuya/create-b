@@ -12,13 +12,21 @@ import Prelude (mempty, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 
 type OptionsRecord =
-  { directory :: Maybe String
+  { contentTemplate :: Maybe String
+  , directory :: Maybe String
+  , metaTemplate :: Maybe String
   , template :: Maybe String
   }
 data CommandLineOptions
 
+contentTemplateOption :: Option CommandLineOptions String
+contentTemplateOption = Options.opt "contentTemplate"
+
 directoryOption :: Option CommandLineOptions String
 directoryOption = Options.opt "directory"
+
+metaTemplateOption :: Option CommandLineOptions String
+metaTemplateOption = Options.opt "metaTemplate"
 
 templateOption :: Option CommandLineOptions String
 templateOption = Options.opt "template"
@@ -34,7 +42,9 @@ parseOptions' args = Tuple.snd (Array.foldl go (Tuple Nothing mempty) args)
   where
     go (Tuple Nothing options) arg =
       case arg of
+        "--content-template" -> Tuple (Just contentTemplateOption) options
         "--directory" -> Tuple (Just directoryOption) options
+        "--meta-template" -> Tuple (Just metaTemplateOption) options
         "--template" -> Tuple (Just templateOption) options
         _ -> Tuple Nothing options
     go (Tuple (Just option) options) arg =
