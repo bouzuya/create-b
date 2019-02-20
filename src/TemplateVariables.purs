@@ -48,7 +48,7 @@ build' nowInJp posts =
       [ -- YYYY-MM-DDTHH:MM:SS+09:00
         Tuple "local_date_time" (OffsetDateTime.toString nowInJp)
       , -- YYYY-MM-DD (local)
-        Tuple "month" (DateTimeFormatter.toDateString localDateTime)
+        Tuple "date" (DateTimeFormatter.toDateString localDateTime)
       , -- YYYY (local)
         Tuple "year" (DateTimeFormatter.toYearString localDateTime)
       , -- MM (local)
