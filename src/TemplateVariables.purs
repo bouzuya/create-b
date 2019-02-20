@@ -40,18 +40,23 @@ build directory = do
 build' :: OffsetDateTime -> Array Post -> Object String
 build' nowInJp posts =
   let
-    wd = WeekDate.toWeekDate (DateTime.date localDateTime)
     localDateTime = OffsetDateTime.toDateTime nowInJp
+    localDate = DateTime.date localDateTime
+    wd = WeekDate.toWeekDate localDate
   in
     Object.fromFoldable
       [ -- YYYY-MM-DDTHH:MM:SS+09:00
         Tuple "local_date_time" (OffsetDateTime.toString nowInJp)
-        -- YYYY-Www
-      , Tuple "year_week" (WeekDate.toYearWeekString wd)
-        -- /YYYY/MM/YYYY-MM-DD
-      , Tuple "blog_post_path" (Formatter.format pathFormatter localDateTime)
-        -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
-      , Tuple "week_posts" (buildWeekPosts posts)
+      , -- YYYY-MM-DD (local)
+        Tuple "month" (DateTimeFormatter.toDateString localDateTime)
+      , -- YYYY (local)
+        Tuple "year" (DateTimeFormatter.toYearString localDateTime)
+      , -- MM (local)
+        Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
+      , -- YYYY-Www
+        Tuple "year_week" (WeekDate.toYearWeekString wd)
+      , -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
+        Tuple "week_posts" (buildWeekPosts posts)
       ]
 
 buildWeekPosts :: Array Post -> String

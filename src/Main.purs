@@ -38,11 +38,11 @@ main = do
       Template.BlogPostWeekday -> do
         content <- readTemplate "blog_post_weekday.md"
         meta <- readTemplate "blog_post_weekday.json"
-        pure { content, meta, path: "{{blog_post_path}}" }
+        pure { content, meta, path: "/{{year}}/{{month}}/{{date}}" }
       Template.BlogPostWeekend -> do
         content <- readTemplate "blog_post_weekend.md"
         meta <- readTemplate "blog_post_weekend.json"
-        pure { content, meta, path: "{{blog_post_path}}" }
+        pure { content, meta, path: "/{{year}}/{{month}}/{{date}}" }
   let
     content = TemplateString.template generated.content templateVariables
     meta = TemplateString.template generated.meta templateVariables
