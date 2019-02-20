@@ -46,7 +46,7 @@ build' nowInJp posts =
   in
     Object.fromFoldable
       [ -- YYYY-MM-DDTHH:MM:SS+09:00
-        Tuple "local_date_time" (OffsetDateTime.toString nowInJp)
+        Tuple "date_time" (OffsetDateTime.toString nowInJp)
       , -- YYYY-MM-DD (local)
         Tuple "date" (DateTimeFormatter.toDateString localDateTime)
       , -- YYYY (local)
