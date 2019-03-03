@@ -1,8 +1,8 @@
-module Test.WeekDate
+module Test.WeekDateFormat
   ( tests
   ) where
 
-import Bouzuya.DateTime.WeekDate as BouzuyaWeekDate
+import Bouzuya.DateTime.WeekDate as WeekDate
 import Data.Date as Date
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
@@ -10,7 +10,7 @@ import Partial.Unsafe (unsafePartial)
 import Prelude (bind, discard, ($))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
-import WeekDate as WeekDate
+import WeekDateFormat as WeekDateFormat
 
 tests :: TestSuite
 tests = suite "WeekDate" do
@@ -23,7 +23,11 @@ tests = suite "WeekDate" do
       Date.exactDate year month dom
 
   test "toISOString" do
-    Assert.equal "2019-W01-3" (WeekDate.toISOString (BouzuyaWeekDate.fromDate d1))
+    Assert.equal
+      "2019-W01-3"
+      (WeekDateFormat.toISOString (WeekDate.fromDate d1))
 
   test "toYearWeekString" do
-    Assert.equal "2019-W01" (WeekDate.toYearWeekString (BouzuyaWeekDate.fromDate d1))
+    Assert.equal
+      "2019-W01"
+      (WeekDateFormat.toYearWeekString (WeekDate.fromDate d1))

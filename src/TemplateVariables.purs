@@ -2,7 +2,7 @@ module TemplateVariables
   ( build
   ) where
 
-import Bouzuya.DateTime.WeekDate as BouzuyaWeekDate
+import Bouzuya.DateTime.WeekDate as WeekDate
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
 import Data.Date (Date)
@@ -29,7 +29,7 @@ import OffsetDateTime as OffsetDateTime
 import Prelude (bind, bottom, map, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TimeZoneOffset as TimeZoneOffset
-import WeekDate as WeekDate
+import WeekDateFormat as WeekDateFormat
 
 type Post = { date :: String, title :: String }
 
@@ -44,7 +44,7 @@ build' nowInJp posts =
   let
     localDateTime = OffsetDateTime.toDateTime nowInJp
     localDate = DateTime.date localDateTime
-    wd = BouzuyaWeekDate.fromDate localDate
+    wd = WeekDate.fromDate localDate
   in
     Object.fromFoldable
       [ -- YYYY-MM-DDTHH:MM:SS+09:00
@@ -56,7 +56,7 @@ build' nowInJp posts =
       , -- MM (local)
         Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
       , -- YYYY-Www
-        Tuple "year_week" (WeekDate.toYearWeekString wd)
+        Tuple "year_week" (WeekDateFormat.toYearWeekString wd)
       , -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
         Tuple "week_posts" (buildWeekPosts posts)
       ]

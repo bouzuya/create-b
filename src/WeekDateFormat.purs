@@ -1,4 +1,4 @@
-module WeekDate
+module WeekDateFormat
   ( toISOString
   , toYearWeekString
   ) where
