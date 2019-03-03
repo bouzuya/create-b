@@ -2,6 +2,7 @@ module Main
   ( main
   ) where
 
+import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
 import Data.Maybe (maybe)
 import Effect (Effect)
@@ -11,7 +12,6 @@ import Node.FS.Sync as FS
 import Node.Process as Process
 import Options as Options
 import Prelude (Unit, bind, discard, map, pure, (<>))
-import TemplateString as TemplateString
 import TemplateVariables as TemplateVariables
 
 readTemplate :: String -> Effect String
