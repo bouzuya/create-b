@@ -28,7 +28,7 @@ import OffsetDateTime (OffsetDateTime)
 import OffsetDateTime as OffsetDateTime
 import Prelude (bind, bottom, map, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
-import TimeZoneOffset as TimeZoneOffset
+import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 import WeekDateFormat as WeekDateFormat
 
 type Post = { date :: String, title :: String }
@@ -90,7 +90,7 @@ nowOffsetDateTimeInJp = do
     maybe
       (throw "invalid time zone offset")
       pure
-      (TimeZoneOffset.fromString "+09:00")
+      (TimeZoneOffsetFormat.fromString "+09:00")
   maybe
     (throw "invalid offset date time")
     pure

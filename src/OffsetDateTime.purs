@@ -9,14 +9,15 @@ module OffsetDateTime
   , toTimeString
   ) where
 
+import Bouzuya.DateTime.TimeZoneOffset (TimeZoneOffset)
+import Bouzuya.DateTime.TimeZoneOffset as TimeZoneOffset
 import Data.DateTime (DateTime)
 import Data.DateTime as DateTime
 import Data.Maybe (Maybe)
 import Data.Time.Duration (Milliseconds)
 import DateTimeFormatter as DateTimeFormatter
 import Prelude (class Eq, class Show, bind, map, pure, show, (<>))
-import TimeZoneOffset (TimeZoneOffset)
-import TimeZoneOffset as TimeZoneOffset
+import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 
 newtype LocalDateTime = LocalDateTime DateTime
 
@@ -64,7 +65,8 @@ toDateTime (OffsetDateTime _ _ (LocalDateTime local)) = local
 -- YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS+HH:MM
 toString :: OffsetDateTime -> String
 toString (OffsetDateTime _ offset (LocalDateTime local)) =
-  (DateTimeFormatter.toDateTimeString local) <> (TimeZoneOffset.toString offset)
+  (DateTimeFormatter.toDateTimeString local) <>
+    (TimeZoneOffsetFormat.toString offset)
 
 toTimeString :: OffsetDateTime -> String
 toTimeString (OffsetDateTime _ _ (LocalDateTime local)) =

@@ -11,12 +11,13 @@ import Prelude (discard, show, (<<<))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import Text.Parsing.Parser as Parser
-import TimeZoneOffset as TimeZoneOffset
+import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 
 tests :: TestSuite
 tests = suite "OffsetDateTime" do
   let
-    jpOffset = unsafePartial (fromJust (TimeZoneOffset.fromString "+09:00"))
+    jpOffset =
+      unsafePartial (fromJust (TimeZoneOffsetFormat.fromString "+09:00"))
     dateTime1 =
       unsafePartial
         (fromRight
