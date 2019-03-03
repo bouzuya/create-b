@@ -2,14 +2,15 @@ module Test.WeekDate
   ( tests
   ) where
 
-import Bouzuya.DateTime as Date
+import Bouzuya.DateTime.WeekDate as BouzuyaWeekDate
+import Data.Date as Date
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
 import Partial.Unsafe (unsafePartial)
 import Prelude (bind, discard, ($))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
-import WeekDate (dayOfWeek, toDate, toISOString, toWeekDate, toYearWeekString, weekOfYear, weekYear)
+import WeekDate as WeekDate
 
 tests :: TestSuite
 tests = suite "WeekDate" do
@@ -21,24 +22,8 @@ tests = suite "WeekDate" do
       dom <- toEnum 2
       Date.exactDate year month dom
 
-  test "dayOfWeek" do
-    Assert.equal (Date.weekday d1) (dayOfWeek (toWeekDate d1))
-
-  test "toDate" do
-    Assert.equal d1 (toDate (toWeekDate d1))
-
   test "toISOString" do
-    Assert.equal "2019-W01-3" (toISOString (toWeekDate d1))
-
-  test "toWeekDate" do
-    -- do nothing
-    Assert.equal 1 1
+    Assert.equal "2019-W01-3" (WeekDate.toISOString (BouzuyaWeekDate.fromDate d1))
 
   test "toYearWeekString" do
-    Assert.equal "2019-W01" (toYearWeekString (toWeekDate d1))
-
-  test "weekYear" do
-    Assert.equal (Date.weekYear d1) (weekYear (toWeekDate d1))
-
-  test "weekOfYear" do
-    Assert.equal (Date.weekOfYear d1) (weekOfYear (toWeekDate d1))
+    Assert.equal "2019-W01" (WeekDate.toYearWeekString (BouzuyaWeekDate.fromDate d1))
