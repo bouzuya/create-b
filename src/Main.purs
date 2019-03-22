@@ -65,11 +65,7 @@ main = do
       (const (Exception.throw "invalid options"))
       pure
       (Options.parse args)
-  directory <-
-    Maybe.maybe
-      (Exception.throw "directory is required")
-      pure
-      options.directory
+  directory <- pure (Maybe.fromMaybe "." options.directory)
   templateDirectory <-
     Maybe.maybe
       (Exception.throw "template is required")
