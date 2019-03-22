@@ -2,6 +2,8 @@ module Main
   ( main
   ) where
 
+import Prelude
+
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
 import Data.Maybe (maybe)
@@ -9,13 +11,29 @@ import Effect (Effect)
 import Effect.Exception (throw)
 import Node.Encoding as Encoding
 import Node.FS.Sync as FS
+import Node.Path as Path
 import Node.Process as Process
 import Options as Options
-import Prelude (Unit, bind, discard, map, pure, (<>))
 import TemplateVariables as TemplateVariables
 
 readTemplate :: String -> Effect String
 readTemplate = FS.readTextFile Encoding.UTF8
+
+mkdirp :: String -> Effect Unit
+mkdirp path = do
+  let parent = Path.dirname path
+  if parent == path
+    then pure unit
+    else do
+      existsParent <- FS.exists parent
+      if existsParent then pure unit else mkdirp parent
+  exists <- FS.exists path
+  if exists then pure unit else FS.mkdir path
+
+saveTextFile :: String -> String -> Effect Unit
+saveTextFile path content = do
+  mkdirp (Path.dirname path)
+  FS.writeTextFile Encoding.UTF8 path content
 
 main :: Effect Unit
 main = do
@@ -33,5 +51,5 @@ main = do
       TemplateString.template "/{{year}}/{{month}}/{{date}}" templateVariables
     contentPath = directory <> path <> ".md"
     metaPath = directory <> path <> ".json"
-  FS.writeTextFile Encoding.UTF8 contentPath content
-  FS.writeTextFile Encoding.UTF8 metaPath meta
+  saveTextFile contentPath content
+  saveTextFile metaPath meta
