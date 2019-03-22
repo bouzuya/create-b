@@ -28,7 +28,7 @@ mkdirp path = do
   if exists then pure unit else FS.mkdir path
 
 readDirectory :: String -> Effect (Array String)
-readDirectory path = map (map (append path)) (FS.readdir path)
+readDirectory path = map (map (\p -> Path.concat [path, p])) (FS.readdir path)
 
 readTextFile :: String -> Effect String
 readTextFile = FS.readTextFile Encoding.UTF8
