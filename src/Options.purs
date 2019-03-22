@@ -1,33 +1,22 @@
 module Options
-  ( parseOptions
+  ( parse
   ) where
 
-import Prelude
-
 import Bouzuya.CommandLineOption as CommandLineOption
-import Data.Either as Either
+import Data.Either (Either)
 import Data.Maybe (Maybe(..))
 
-type OptionsRecord =
-  { contentTemplate :: Maybe String
-  , directory :: Maybe String
-  , metaTemplate :: Maybe String
+type Options =
+  { directory :: Maybe String
   }
 
-parseOptions :: Array String -> Maybe OptionsRecord
-parseOptions args =
-  map
-    _.options
-    (Either.hush
-      (CommandLineOption.parse
-        { contentTemplate:
-            CommandLineOption.maybeStringOption
-              "content-template" Nothing "FILE" "" Nothing
-        , directory:
-            CommandLineOption.maybeStringOption
-              "directory" Nothing "DIR" "" Nothing
-        , metaTemplate:
-            CommandLineOption.maybeStringOption
-              "meta-template" Nothing "FILE" "" Nothing
-        }
-        args))
+parse ::
+  Array String
+  -> Either String { arguments :: Array String, options :: Options }
+parse args =
+  CommandLineOption.parse
+    { directory:
+        CommandLineOption.maybeStringOption
+          "directory" Nothing "DIR" "" Nothing
+    }
+    args

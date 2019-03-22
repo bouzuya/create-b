@@ -6,10 +6,11 @@ import Prelude
 
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
-import Data.Maybe (maybe)
+import Data.Either as Either
+import Data.Maybe as Maybe
 import Effect (Effect)
 import Effect as Effect
-import Effect.Exception (throw)
+import Effect.Exception as Exception
 import Foreign.Object (Object)
 import Node.Encoding as Encoding
 import Node.FS.Stats as Stats
@@ -59,19 +60,20 @@ processFile outputDirectory inputPath variables = do
 main :: Effect Unit
 main = do
   args <- map (Array.drop 2) Process.argv
-  optionsMaybe <- pure (Options.parseOptions args)
-  options <- maybe (throw "invalid options") pure optionsMaybe
-  directory <- maybe (throw "directory is required") pure options.directory
-  contentTemplate <- maybe (pure "") readTextFile options.contentTemplate
-  metaTemplate <- maybe (pure "") readTextFile options.metaTemplate
+  { arguments, options } <-
+    Either.either
+      (const (Exception.throw "invalid options"))
+      pure
+      (Options.parse args)
+  directory <-
+    Maybe.maybe
+      (Exception.throw "directory is required")
+      pure
+      options.directory
+  templateDirectory <-
+    Maybe.maybe
+      (Exception.throw "template is required")
+      pure
+      (Array.head arguments)
   templateVariables <- TemplateVariables.build directory
-  let
-    content = TemplateString.template contentTemplate templateVariables
-    meta = TemplateString.template metaTemplate templateVariables
-    path =
-      TemplateString.template "/{{year}}/{{month}}/{{date}}" templateVariables
-    contentPath = directory <> path <> ".md"
-    metaPath = directory <> path <> ".json"
-  writeTextFile contentPath content
-  writeTextFile metaPath meta
-  -- TODO: processDirectory directory templateDirectory templateVariables
+  processDirectory directory templateDirectory templateVariables
