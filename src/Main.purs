@@ -8,9 +8,11 @@ import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
 import Data.Maybe (maybe)
 import Effect (Effect)
+import Effect as Effect
 import Effect.Exception (throw)
 import Foreign.Object (Object)
 import Node.Encoding as Encoding
+import Node.FS.Stats as Stats
 import Node.FS.Sync as FS
 import Node.Path as Path
 import Node.Process as Process
@@ -36,7 +38,15 @@ writeTextFile path content = do
   mkdirp (Path.dirname path)
   FS.writeTextFile Encoding.UTF8 path content
 
--- TODO: use this
+processDirectory :: String -> String -> Object String -> Effect Unit
+processDirectory outputDirectory inputPath variables = do
+  files <- map (map (append inputPath)) (FS.readdir inputPath)
+  Effect.foreachE files \file -> do
+    isDirectory <- map Stats.isDirectory (FS.stat file)
+    if isDirectory
+      then processDirectory outputDirectory file variables
+      else processFile outputDirectory file variables
+
 processFile :: String -> String -> Object String -> Effect Unit
 processFile outputDirectory inputPath variables = do
   contentTemplate <- readTextFile inputPath
@@ -64,3 +74,4 @@ main = do
     metaPath = directory <> path <> ".json"
   writeTextFile contentPath content
   writeTextFile metaPath meta
+  -- TODO: processDirectory directory templateDirectory templateVariables
