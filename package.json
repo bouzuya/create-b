@@ -30,7 +30,7 @@
   "scripts": {
     "build": "spago build",
     "bundle": "spago make-module",
-    "docs": "spago sources | xargs purs docs --format html 'src/**/*.purs'",
+    "docs": "spago docs",
     "prepare": "npm-run-all -s build bundle",
     "purs": "purs",
     "repl": "spago repl",
