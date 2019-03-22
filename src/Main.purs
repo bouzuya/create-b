@@ -11,51 +11,30 @@ import Data.Maybe as Maybe
 import Effect (Effect)
 import Effect as Effect
 import Effect.Exception as Exception
+import FS as FS
 import Foreign.Object (Object)
-import Node.Encoding as Encoding
-import Node.FS.Stats as Stats
-import Node.FS.Sync as FS
 import Node.Path as Path
 import Node.Process as Process
 import Options as Options
 import TemplateVariables as TemplateVariables
 
-mkdirp :: String -> Effect Unit
-mkdirp path = do
-  let parent = Path.dirname path
-  if parent == path
-    then pure unit
-    else do
-      existsParent <- FS.exists parent
-      if existsParent then pure unit else mkdirp parent
-  exists <- FS.exists path
-  if exists then pure unit else FS.mkdir path
-
-readTextFile :: String -> Effect String
-readTextFile = FS.readTextFile Encoding.UTF8
-
-writeTextFile :: String -> String -> Effect Unit
-writeTextFile path content = do
-  mkdirp (Path.dirname path)
-  FS.writeTextFile Encoding.UTF8 path content
-
 processDirectory :: String -> String -> Object String -> Effect Unit
 processDirectory outputDirectory inputPath variables = do
-  files <- map (map (append inputPath)) (FS.readdir inputPath)
+  files <- FS.readDirectory inputPath
   Effect.foreachE files \file -> do
-    isDirectory <- map Stats.isDirectory (FS.stat file)
+    isDirectory <- FS.isDirectory file
     if isDirectory
       then processDirectory outputDirectory file variables
       else processFile outputDirectory file variables
 
 processFile :: String -> String -> Object String -> Effect Unit
 processFile outputDirectory inputPath variables = do
-  contentTemplate <- readTextFile inputPath
+  contentTemplate <- FS.readTextFile inputPath
   let
     pathTemplate = Path.concat [outputDirectory, inputPath]
     outputPath = TemplateString.template pathTemplate variables
     outputContent = TemplateString.template contentTemplate variables
-  writeTextFile outputPath outputContent
+  FS.writeTextFile outputPath outputContent
 
 main :: Effect Unit
 main = do
