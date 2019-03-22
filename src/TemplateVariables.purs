@@ -13,6 +13,7 @@ import Data.Formatter.DateTime as Formatter
 import Data.Int as Int
 import Data.List as List
 import Data.Maybe (maybe)
+import Data.String as String
 import Data.Time.Duration (Days(..))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
@@ -44,6 +45,12 @@ build' nowInJp posts =
   let
     localDateTime = OffsetDateTime.toDateTime nowInJp
     localDate = DateTime.date localDateTime
+    -- YYYY-MM-DDTHH:MM:SSZ -> YYYYMMDDTHHMMSSZ
+    toBasic =
+      (String.replaceAll (String.Pattern ":") (String.Replacement "")) <<<
+      (String.replaceAll (String.Pattern "-") (String.Replacement ""))
+    utcDateTime = OffsetDateTime.inUTC nowInJp
+    utcDateTimeString = OffsetDateTime.toString utcDateTime
     wd = WeekDate.fromDate localDate
   in
     Object.fromFoldable
@@ -55,6 +62,10 @@ build' nowInJp posts =
         Tuple "year" (DateTimeFormatter.toYearString localDateTime)
       , -- MM (local)
         Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
+      , -- YYYY-MM-DDTHH:MM:SSZ
+        Tuple "utc_date_time" utcDateTimeString
+      , -- YYYYMMDDTHHMMSSZ
+        Tuple "utc_date_time_basic" (toBasic utcDateTimeString)
       , -- YYYY-Www
         Tuple "year_week" (WeekDateFormat.toYearWeekString wd)
       , -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
