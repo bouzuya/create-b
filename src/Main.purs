@@ -19,14 +19,10 @@ main = do
   args <- map (Array.drop 2) Process.argv
   { arguments, options } <-
     Either.either
-      (const (Exception.throw "invalid options"))
-      pure
-      (Options.parse args)
+      (const (Exception.throw "invalid options")) pure (Options.parse args)
   directory <- pure (Maybe.fromMaybe "." options.directory)
-  templateDirectory <-
+  template <-
     Maybe.maybe
-      (Exception.throw "template is required")
-      pure
-      (Array.head arguments)
-  templateVariables <- TemplateVariables.build directory
-  TemplateProject.template directory templateDirectory templateVariables
+      (Exception.throw "template is required") pure (Array.head arguments)
+  variables <- TemplateVariables.build directory
+  TemplateProject.template directory template variables
