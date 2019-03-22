@@ -9,15 +9,13 @@ import Data.Array as Array
 import Data.Maybe (maybe)
 import Effect (Effect)
 import Effect.Exception (throw)
+import Foreign.Object (Object)
 import Node.Encoding as Encoding
 import Node.FS.Sync as FS
 import Node.Path as Path
 import Node.Process as Process
 import Options as Options
 import TemplateVariables as TemplateVariables
-
-readTemplate :: String -> Effect String
-readTemplate = FS.readTextFile Encoding.UTF8
 
 mkdirp :: String -> Effect Unit
 mkdirp path = do
@@ -30,10 +28,23 @@ mkdirp path = do
   exists <- FS.exists path
   if exists then pure unit else FS.mkdir path
 
-saveTextFile :: String -> String -> Effect Unit
-saveTextFile path content = do
+readTextFile :: String -> Effect String
+readTextFile = FS.readTextFile Encoding.UTF8
+
+writeTextFile :: String -> String -> Effect Unit
+writeTextFile path content = do
   mkdirp (Path.dirname path)
   FS.writeTextFile Encoding.UTF8 path content
+
+-- TODO: use this
+processFile :: String -> String -> Object String -> Effect Unit
+processFile outputDirectory inputPath variables = do
+  contentTemplate <- readTextFile inputPath
+  let
+    pathTemplate = Path.concat [outputDirectory, inputPath]
+    outputPath = TemplateString.template pathTemplate variables
+    outputContent = TemplateString.template contentTemplate variables
+  writeTextFile outputPath outputContent
 
 main :: Effect Unit
 main = do
@@ -41,8 +52,8 @@ main = do
   optionsMaybe <- pure (Options.parseOptions args)
   options <- maybe (throw "invalid options") pure optionsMaybe
   directory <- maybe (throw "directory is required") pure options.directory
-  contentTemplate <- maybe (pure "") readTemplate options.contentTemplate
-  metaTemplate <- maybe (pure "") readTemplate options.metaTemplate
+  contentTemplate <- maybe (pure "") readTextFile options.contentTemplate
+  metaTemplate <- maybe (pure "") readTextFile options.metaTemplate
   templateVariables <- TemplateVariables.build directory
   let
     content = TemplateString.template contentTemplate templateVariables
@@ -51,5 +62,5 @@ main = do
       TemplateString.template "/{{year}}/{{month}}/{{date}}" templateVariables
     contentPath = directory <> path <> ".md"
     metaPath = directory <> path <> ".json"
-  saveTextFile contentPath content
-  saveTextFile metaPath meta
+  writeTextFile contentPath content
+  writeTextFile metaPath meta
