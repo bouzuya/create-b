@@ -7,7 +7,6 @@ import Prelude
 import Bouzuya.TemplateString as TemplateString
 import Data.Maybe as Maybe
 import Data.String as String
-import Data.Traversable as Traversable
 import Effect (Effect)
 import Effect as Effect
 import Effect.Exception as Exception
