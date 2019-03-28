@@ -62,6 +62,8 @@ build' nowInJp posts =
         Tuple "year" (DateTimeFormatter.toYearString localDateTime)
       , -- MM (local)
         Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
+      , -- DD (local)
+        Tuple "day" (DateTimeFormatter.toDayString localDateTime)
       , -- YYYY-MM-DDTHH:MM:SSZ
         Tuple "utc_date_time" utcDateTimeString
       , -- YYYYMMDDTHHMMSSZ

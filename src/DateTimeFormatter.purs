@@ -2,6 +2,8 @@ module DateTimeFormatter
   ( toDateString
   , toDateString'
   , toDateTimeString
+  , toDayString
+  , toDayString'
   , toMonthString
   , toMonthString'
   , toTimeString
@@ -34,6 +36,18 @@ toDateString' d = toDateString (DateTime d bottom)
 -- YYYY-MM-DDTHH:MM:SS
 toDateTimeString :: DateTime -> String
 toDateTimeString dt = (toDateString dt) <> "T" <> (toTimeString dt)
+
+-- DD
+toDayString :: DateTime -> String
+toDayString =
+  Formatter.format
+    (List.fromFoldable
+      [ Formatter.DayOfMonthTwoDigits
+      ])
+
+-- DD
+toDayString' :: Date -> String
+toDayString' d = toDayString (DateTime d bottom)
 
 -- MM
 toMonthString :: DateTime -> String
