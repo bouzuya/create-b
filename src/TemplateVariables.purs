@@ -12,10 +12,11 @@ import Data.DateTime as DateTime
 import Data.Formatter.DateTime as Formatter
 import Data.Int as Int
 import Data.List as List
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe as Maybe
 import Data.String as String
 import Data.Time.Duration (Days(..))
-import Data.Traversable (traverse)
+import Data.Traversable as Traversable
 import Data.Tuple (Tuple(..))
 import DateTimeFormatter as DateTimeFormatter
 import Effect (Effect)
@@ -27,7 +28,7 @@ import Node.Encoding as Encoding
 import Node.FS.Sync as FS
 import OffsetDateTime (OffsetDateTime)
 import OffsetDateTime as OffsetDateTime
-import Prelude (bind, bottom, map, negate, pure, (<<<), (<>))
+import Prelude (bind, bottom, identity, map, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 import WeekDateFormat as WeekDateFormat
@@ -37,11 +38,11 @@ type Post = { date :: String, title :: String }
 build :: String -> Effect (Object String)
 build directory = do
   nowInJp <- nowOffsetDateTimeInJp
-  posts <- readPosts directory (OffsetDateTime.toDateTime nowInJp)
-  pure (build' nowInJp posts)
+  postsMaybe <- readPosts directory (OffsetDateTime.toDateTime nowInJp)
+  pure (build' nowInJp postsMaybe)
 
-build' :: OffsetDateTime -> Array Post -> Object String
-build' nowInJp posts =
+build' :: OffsetDateTime -> Maybe (Array Post) -> Object String
+build' nowInJp postsMaybe =
   let
     localDateTime = OffsetDateTime.toDateTime nowInJp
     localDate = DateTime.date localDateTime
@@ -78,7 +79,7 @@ build' nowInJp posts =
       , -- YYYY-Www
         Tuple "year_week" (WeekDateFormat.toYearWeekString wd)
       , -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
-        Tuple "week_posts" (buildWeekPosts posts)
+        Tuple "week_posts" (Maybe.maybe "" buildWeekPosts postsMaybe)
       ]
 
 buildWeekPosts :: Array Post -> String
@@ -131,19 +132,23 @@ pathFormatter =
     , Formatter.DayOfMonthTwoDigits
     ]
 
-readPost :: String -> Date -> Effect Post
+readPost :: String -> Date -> Effect (Maybe Post)
 readPost directory d = do
   let metaPath = directory <> (formatPath d) <> ".json"
-  text <- FS.readTextFile Encoding.UTF8 metaPath
-  { title } <-
-    maybe
-      (throw "invalid meta data")
-      pure
-      (SimpleJSON.readJSON_ text :: _ { title :: String })
-  pure { date: DateTimeFormatter.toDateString' d, title }
+  exists <- FS.exists metaPath
+  if exists
+    then do
+      text <- FS.readTextFile Encoding.UTF8 metaPath
+      { title } <-
+        maybe
+          (throw "invalid meta data")
+          pure
+          (SimpleJSON.readJSON_ text :: _ { title :: String })
+      pure (Just { date: DateTimeFormatter.toDateString' d, title })
+    else pure Nothing
 
-readPosts :: String -> DateTime -> Effect (Array Post)
-readPosts directory localDateTime =
-  traverse
-    (readPost directory)
-    (datesInWeekBefore (DateTime.date localDateTime))
+readPosts :: String -> DateTime -> Effect (Maybe (Array Post))
+readPosts directory localDateTime = do
+  dates <- pure (datesInWeekBefore (DateTime.date localDateTime))
+  postMaybes <- Traversable.traverse (readPost directory) dates
+  pure (Traversable.traverse identity postMaybes)
