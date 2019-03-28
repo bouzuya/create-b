@@ -49,8 +49,9 @@ build' nowInJp posts =
     toBasic =
       (String.replaceAll (String.Pattern ":") (String.Replacement "")) <<<
       (String.replaceAll (String.Pattern "-") (String.Replacement ""))
-    utcDateTime = OffsetDateTime.inUTC nowInJp
-    utcDateTimeString = OffsetDateTime.toString utcDateTime
+    utcOffsetDateTime = OffsetDateTime.inUTC nowInJp
+    utcDateTime = OffsetDateTime.toDateTime utcOffsetDateTime
+    utcDateTimeString = OffsetDateTime.toString utcOffsetDateTime
     wd = WeekDate.fromDate localDate
   in
     Object.fromFoldable
@@ -58,16 +59,22 @@ build' nowInJp posts =
         Tuple "date_time" (OffsetDateTime.toString nowInJp)
       , -- YYYY-MM-DD (local)
         Tuple "date" (DateTimeFormatter.toDateString localDateTime)
-      , -- YYYY (local)
-        Tuple "year" (DateTimeFormatter.toYearString localDateTime)
-      , -- MM (local)
-        Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
       , -- DD (local)
         Tuple "day" (DateTimeFormatter.toDayString localDateTime)
+      , -- MM (local)
+        Tuple "month" (DateTimeFormatter.toMonthString localDateTime)
+      , -- YYYY (local)
+        Tuple "year" (DateTimeFormatter.toYearString localDateTime)
       , -- YYYY-MM-DDTHH:MM:SSZ
         Tuple "utc_date_time" utcDateTimeString
       , -- YYYYMMDDTHHMMSSZ
         Tuple "utc_date_time_basic" (toBasic utcDateTimeString)
+      , -- DD (UTC)
+        Tuple "utc_day" (DateTimeFormatter.toDayString utcDateTime)
+      , -- MM (UTC)
+        Tuple "utc_month" (DateTimeFormatter.toMonthString utcDateTime)
+      , -- YYYY (UTC)
+        Tuple "utc_year" (DateTimeFormatter.toYearString utcDateTime)
       , -- YYYY-Www
         Tuple "year_week" (WeekDateFormat.toYearWeekString wd)
       , -- - [YYYY-MM-DD title][YYYY-MM-DD]\n...
