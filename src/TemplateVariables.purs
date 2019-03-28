@@ -2,6 +2,8 @@ module TemplateVariables
   ( build
   ) where
 
+import Prelude
+
 import Bouzuya.DateTime.WeekDate as WeekDate
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
@@ -12,7 +14,7 @@ import Data.DateTime as DateTime
 import Data.Formatter.DateTime as Formatter
 import Data.Int as Int
 import Data.List as List
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe)
 import Data.Maybe as Maybe
 import Data.String as String
 import Data.Time.Duration (Days(..))
@@ -20,15 +22,14 @@ import Data.Traversable as Traversable
 import Data.Tuple (Tuple(..))
 import DateTimeFormatter as DateTimeFormatter
 import Effect (Effect)
-import Effect.Exception (throw)
-import Effect.Now (nowDateTime)
+import Effect.Exception as Exception
+import Effect.Now as Now
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Node.Encoding as Encoding
 import Node.FS.Sync as FS
 import OffsetDateTime (OffsetDateTime)
 import OffsetDateTime as OffsetDateTime
-import Prelude (bind, bottom, identity, map, negate, pure, (<<<), (<>))
 import Simple.JSON as SimpleJSON
 import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 import WeekDateFormat as WeekDateFormat
@@ -106,14 +107,14 @@ formatPath d = Formatter.format pathFormatter (DateTime d bottom)
 
 nowOffsetDateTimeInJp :: Effect OffsetDateTime
 nowOffsetDateTimeInJp = do
-  dateTimeInUTC <- nowDateTime
+  dateTimeInUTC <- Now.nowDateTime
   jpOffset <-
-    maybe
-      (throw "invalid time zone offset")
+    Maybe.maybe
+      (Exception.throw "invalid time zone offset")
       pure
       (TimeZoneOffsetFormat.fromString "+09:00")
-  maybe
-    (throw "invalid offset date time")
+  Maybe.maybe
+    (Exception.throw "invalid offset date time")
     pure
     (OffsetDateTime.offsetDateTime jpOffset dateTimeInUTC)
 
@@ -140,12 +141,12 @@ readPost directory d = do
     then do
       text <- FS.readTextFile Encoding.UTF8 metaPath
       { title } <-
-        maybe
-          (throw "invalid meta data")
+        Maybe.maybe
+          (Exception.throw "invalid meta data")
           pure
           (SimpleJSON.readJSON_ text :: _ { title :: String })
-      pure (Just { date: DateTimeFormatter.toDateString' d, title })
-    else pure Nothing
+      pure (Maybe.Just { date: DateTimeFormatter.toDateString' d, title })
+    else pure Maybe.Nothing
 
 readPosts :: String -> DateTime -> Effect (Maybe (Array Post))
 readPosts directory localDateTime = do
