@@ -75,7 +75,7 @@ build' nowInJp posts =
       ]
 
 buildWeekPosts :: Array Post -> String
-buildWeekPosts posts = Array.intercalate "\n" (map postToLine posts)
+buildWeekPosts posts = String.joinWith "\n" (map postToLine posts)
   where
     lineTmpl = "- [{{date}} {{title}}][{{date}}]"
     postToVars { date, title } =

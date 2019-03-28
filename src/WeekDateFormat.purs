@@ -28,4 +28,4 @@ toYearWeekString wd =
       | n < 100 = "00" <> show n
       | n < 1000 = "0" <> show n
       | otherwise = show n
-  in Foldable.intercalate "" [pad4 y, "-W", pad2 woy]
+  in Foldable.fold [pad4 y, "-W", pad2 woy]
