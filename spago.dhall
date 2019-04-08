@@ -7,6 +7,7 @@ You can edit this file as you like.
 , dependencies =
     [ "bouzuya-command-line-option-parser"
     , "bouzuya-datetime"
+    , "bouzuya-datetime-formatter"
     , "bouzuya-template-string"
     , "console"
     , "effect"
