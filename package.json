@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "purescript": "^0.12.3",
-    "spago": "^0.7.2"
+    "spago": "^0.7.5"
   },
   "files": [
     "bin"

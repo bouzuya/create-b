@@ -109,10 +109,10 @@ let additions =
 -}
 
 let mkPackage =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.3-20190315/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.3-20190403/src/mkPackage.dhall sha256:0b197efa1d397ace6eb46b243ff2d73a3da5638d8d0ac8473e8e4a8fc528cf57
 
 let upstream =
-      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.3-20190315/src/packages.dhall sha256:08714bc666b16834f0f4cf86d408745ce005c43e3343821e4c3864ef28709177
+      https://raw.githubusercontent.com/purescript/package-sets/psc-0.12.3-20190403/src/packages.dhall sha256:53f95298ca7734c037a0ebfd2ce982c004d8377ebc01cc3387f5a61508c6b8ac
 
 let bouzuya =
       https://raw.githubusercontent.com/bouzuya/purescript-bouzuya-packages/20190314/bouzuya.dhall sha256:9bb250fb273ae285731b531399614b22d19a546c49afad75e1c5c96eb31b3753
