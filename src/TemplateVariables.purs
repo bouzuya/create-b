@@ -4,7 +4,10 @@ module TemplateVariables
 
 import Prelude
 
+import Bouzuya.DateTime.Formatter.OffsetDateTime as OffsetDateTimeFormatter
 import Bouzuya.DateTime.Formatter.TimeZoneOffset as TimeZoneOffsetFormatter
+import Bouzuya.DateTime.OffsetDateTime (OffsetDateTime)
+import Bouzuya.DateTime.OffsetDateTime as OffsetDateTime
 import Bouzuya.DateTime.WeekDate as WeekDate
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
@@ -29,8 +32,6 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import Node.Encoding as Encoding
 import Node.FS.Sync as FS
-import OffsetDateTime (OffsetDateTime)
-import OffsetDateTime as OffsetDateTime
 import Simple.JSON as SimpleJSON
 import WeekDateFormat as WeekDateFormat
 
@@ -39,26 +40,26 @@ type Post = { date :: String, title :: String }
 build :: String -> Effect (Object String)
 build directory = do
   nowInJp <- nowOffsetDateTimeInJp
-  postsMaybe <- readPosts directory (OffsetDateTime.toDateTime nowInJp)
+  postsMaybe <- readPosts directory nowInJp
   pure (build' nowInJp postsMaybe)
 
 build' :: OffsetDateTime -> Maybe (Array Post) -> Object String
 build' nowInJp postsMaybe =
   let
-    localDateTime = OffsetDateTime.toDateTime nowInJp
+    localDateTime = OffsetDateTime.toLocalDateTime nowInJp
     localDate = DateTime.date localDateTime
     -- YYYY-MM-DDTHH:MM:SSZ -> YYYYMMDDTHHMMSSZ
     toBasic =
       (String.replaceAll (String.Pattern ":") (String.Replacement "")) <<<
       (String.replaceAll (String.Pattern "-") (String.Replacement ""))
     utcOffsetDateTime = OffsetDateTime.inUTC nowInJp
-    utcDateTime = OffsetDateTime.toDateTime utcOffsetDateTime
-    utcDateTimeString = OffsetDateTime.toString utcOffsetDateTime
+    utcDateTime = OffsetDateTime.toUTCDateTime utcOffsetDateTime
+    utcDateTimeString = OffsetDateTimeFormatter.toString utcOffsetDateTime
     wd = WeekDate.fromDate localDate
   in
     Object.fromFoldable
       [ -- YYYY-MM-DDTHH:MM:SS+09:00
-        Tuple "date_time" (OffsetDateTime.toString nowInJp)
+        Tuple "date_time" (OffsetDateTimeFormatter.toString nowInJp)
       , -- YYYY-MM-DD (local)
         Tuple "date" (DateTimeFormatter.toDateString localDateTime)
       , -- DD (local)
@@ -116,7 +117,7 @@ nowOffsetDateTimeInJp = do
   Maybe.maybe
     (Exception.throw "invalid offset date time")
     pure
-    (OffsetDateTime.offsetDateTime jpOffset dateTimeInUTC)
+    (OffsetDateTime.fromUTCDateTime jpOffset dateTimeInUTC)
 
 pathFormatter :: Formatter.Formatter
 pathFormatter =
@@ -148,8 +149,11 @@ readPost directory d = do
       pure (Maybe.Just { date: DateTimeFormatter.toDateString' d, title })
     else pure Maybe.Nothing
 
-readPosts :: String -> DateTime -> Effect (Maybe (Array Post))
-readPosts directory localDateTime = do
-  dates <- pure (datesInWeekBefore (DateTime.date localDateTime))
+readPosts :: String -> OffsetDateTime -> Effect (Maybe (Array Post))
+readPosts directory offsetDateTime = do
+  dates <-
+    pure
+      (datesInWeekBefore
+        (DateTime.date (OffsetDateTime.toLocalDateTime offsetDateTime)))
   postMaybes <- Traversable.traverse (readPost directory) dates
   pure (Traversable.traverse identity postMaybes)
