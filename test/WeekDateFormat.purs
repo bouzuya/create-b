@@ -2,12 +2,13 @@ module Test.WeekDateFormat
   ( tests
   ) where
 
+import Prelude
+
 import Bouzuya.DateTime.WeekDate as WeekDate
 import Data.Date as Date
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
 import Partial.Unsafe (unsafePartial)
-import Prelude (bind, discard, ($))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import WeekDateFormat as WeekDateFormat
@@ -21,11 +22,6 @@ tests = suite "WeekDate" do
       month <- toEnum 1
       dom <- toEnum 2
       Date.exactDate year month dom
-
-  test "toISOString" do
-    Assert.equal
-      "2019-W01-3"
-      (WeekDateFormat.toISOString (WeekDate.fromDate d1))
 
   test "toYearWeekString" do
     Assert.equal
