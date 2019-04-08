@@ -13,11 +13,8 @@ import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
 import Data.Date (Date)
 import Data.Date as Date
-import Data.DateTime (DateTime(..))
 import Data.DateTime as DateTime
-import Data.Formatter.DateTime as Formatter
 import Data.Int as Int
-import Data.List as List
 import Data.Maybe (Maybe)
 import Data.Maybe as Maybe
 import Data.String as String
@@ -104,7 +101,20 @@ datesInWeekBefore date =
     pure (Date.adjust days date)
 
 formatPath :: Date -> String
-formatPath d = Formatter.format pathFormatter (DateTime d bottom)
+formatPath d =
+  String.joinWith
+    ""
+    [ "/"
+    , DateTimeFormatter.toYearString' d
+    , "/"
+    , DateTimeFormatter.toMonthString' d
+    , "/"
+    , DateTimeFormatter.toYearString' d
+    , "-"
+    , DateTimeFormatter.toMonthString' d
+    , "-"
+    , DateTimeFormatter.toDayString' d
+    ]
 
 nowOffsetDateTimeInJp :: Effect OffsetDateTime
 nowOffsetDateTimeInJp = do
@@ -118,21 +128,6 @@ nowOffsetDateTimeInJp = do
     (Exception.throw "invalid offset date time")
     pure
     (OffsetDateTime.fromUTCDateTime jpOffset dateTimeInUTC)
-
-pathFormatter :: Formatter.Formatter
-pathFormatter =
-  List.fromFoldable
-    [ Formatter.Placeholder "/"
-    , Formatter.YearFull
-    , Formatter.Placeholder "/"
-    , Formatter.MonthTwoDigits
-    , Formatter.Placeholder "/"
-    , Formatter.YearFull
-    , Formatter.Placeholder "-"
-    , Formatter.MonthTwoDigits
-    , Formatter.Placeholder "-"
-    , Formatter.DayOfMonthTwoDigits
-    ]
 
 readPost :: String -> Date -> Effect (Maybe Post)
 readPost directory d = do

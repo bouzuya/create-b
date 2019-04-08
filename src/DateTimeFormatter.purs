@@ -12,79 +12,63 @@ module DateTimeFormatter
   , toYearString'
   ) where
 
-import Data.DateTime (Date, DateTime(..), Time)
-import Data.Formatter.DateTime as Formatter
-import Data.List as List
-import Prelude (bottom, (<>))
+import Prelude
+
+import Bouzuya.DateTime.Formatter.Date as DateFormatter
+import Bouzuya.DateTime.Formatter.DateTime as DateTimeFormatter
+import Bouzuya.DateTime.Formatter.Time as TimeFormatter
+import Data.DateTime (Date, DateTime, Time)
+import Data.DateTime as DateTime
+import Data.String as String
 
 -- YYYY-MM-DD
 toDateString :: DateTime -> String
-toDateString =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.YearFull
-      , Formatter.Placeholder "-"
-      , Formatter.MonthTwoDigits
-      , Formatter.Placeholder "-"
-      , Formatter.DayOfMonthTwoDigits
-      ])
+toDateString = toDateString' <<< DateTime.date
 
 -- YYYY-MM-DD
 toDateString' :: Date -> String
-toDateString' d = toDateString (DateTime d bottom)
+toDateString' = DateFormatter.toString
 
 -- YYYY-MM-DDTHH:MM:SS
 toDateTimeString :: DateTime -> String
-toDateTimeString dt = (toDateString dt) <> "T" <> (toTimeString dt)
+toDateTimeString = DateTimeFormatter.toString
 
 -- DD
 toDayString :: DateTime -> String
-toDayString =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.DayOfMonthTwoDigits
-      ])
+toDayString = toDayString' <<< DateTime.date
 
 -- DD
 toDayString' :: Date -> String
-toDayString' d = toDayString (DateTime d bottom)
+toDayString' =
+  (String.take (String.length "DD"))
+  <<< (String.drop (String.length "YYYY-MM-"))
+  <<< DateFormatter.toString
 
 -- MM
 toMonthString :: DateTime -> String
-toMonthString =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.MonthTwoDigits
-      ])
+toMonthString = toMonthString' <<< DateTime.date
 
 -- MM
 toMonthString' :: Date -> String
-toMonthString' d = toMonthString (DateTime d bottom)
+toMonthString' =
+  (String.take (String.length "MM"))
+  <<< (String.drop (String.length "YYYY-"))
+  <<< DateFormatter.toString
 
 -- HH:MM:SS
 toTimeString :: DateTime -> String
-toTimeString =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.Hours24
-      , Formatter.Placeholder ":"
-      , Formatter.MinutesTwoDigits
-      , Formatter.Placeholder ":"
-      , Formatter.SecondsTwoDigits
-      ])
+toTimeString = toTimeString' <<< DateTime.time
 
 -- HH:MM:SS
 toTimeString' :: Time -> String
-toTimeString' t = toTimeString (DateTime bottom t)
+toTimeString' = TimeFormatter.toString
 
 -- YYYY
 toYearString :: DateTime -> String
-toYearString =
-  Formatter.format
-    (List.fromFoldable
-      [ Formatter.YearFull
-      ])
+toYearString = toYearString' <<< DateTime.date
 
 -- YYYY
 toYearString' :: Date -> String
-toYearString' d = toYearString (DateTime d bottom)
+toYearString' =
+  (String.take (String.length "YYYY"))
+  <<< DateFormatter.toString
