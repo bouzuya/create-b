@@ -4,6 +4,7 @@ module TemplateVariables
 
 import Prelude
 
+import Bouzuya.DateTime.Formatter.TimeZoneOffset as TimeZoneOffsetFormatter
 import Bouzuya.DateTime.WeekDate as WeekDate
 import Bouzuya.TemplateString as TemplateString
 import Data.Array as Array
@@ -31,7 +32,6 @@ import Node.FS.Sync as FS
 import OffsetDateTime (OffsetDateTime)
 import OffsetDateTime as OffsetDateTime
 import Simple.JSON as SimpleJSON
-import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 import WeekDateFormat as WeekDateFormat
 
 type Post = { date :: String, title :: String }
@@ -112,7 +112,7 @@ nowOffsetDateTimeInJp = do
     Maybe.maybe
       (Exception.throw "invalid time zone offset")
       pure
-      (TimeZoneOffsetFormat.fromString "+09:00")
+      (TimeZoneOffsetFormatter.fromString "+09:00")
   Maybe.maybe
     (Exception.throw "invalid offset date time")
     pure

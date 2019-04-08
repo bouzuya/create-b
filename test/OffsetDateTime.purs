@@ -2,6 +2,7 @@ module Test.OffsetDateTime
   ( tests
   ) where
 
+import Bouzuya.DateTime.Formatter.TimeZoneOffset as TimeZoneOffsetFormatter
 import Data.Either (fromRight)
 import Data.Formatter.Parser.Interval as ParserInterval
 import Data.Maybe (fromJust)
@@ -11,13 +12,12 @@ import Prelude (discard, show, (<<<))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import Text.Parsing.Parser as Parser
-import TimeZoneOffsetFormat as TimeZoneOffsetFormat
 
 tests :: TestSuite
 tests = suite "OffsetDateTime" do
   let
     jpOffset =
-      unsafePartial (fromJust (TimeZoneOffsetFormat.fromString "+09:00"))
+      unsafePartial (fromJust (TimeZoneOffsetFormatter.fromString "+09:00"))
     dateTime1 =
       unsafePartial
         (fromRight
